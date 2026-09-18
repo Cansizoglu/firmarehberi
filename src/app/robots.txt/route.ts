@@ -10,6 +10,7 @@ export async function GET() {
     'Allow: /',
     'Disallow: /admin/',
     'Disallow: /api/',
+    'Disallow: /durum',
     '',
     `Sitemap: ${D}/sitemap.xml`,
     '',

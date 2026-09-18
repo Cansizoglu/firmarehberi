@@ -1,10 +1,15 @@
 import type { Metadata } from 'next'
 import { ayarlar } from '@/lib/veri'
+import { eksikDegiskenler } from '@/lib/ortam'
+import KurulumUyarisi from '@/components/site/KurulumUyarisi'
 
 // Admin panelden yapilan degisiklikler aninda yansisin
 export const dynamic = 'force-dynamic'
 
 export async function generateMetadata(): Promise<Metadata> {
+  // Ortam degiskenleri eksikken ayarlar() Supabase'e baglanamaz ve hata firlatir
+  if (eksikDegiskenler().length) return { title: 'Kurulum tamamlanmadı', robots: { index: false } }
+
   const a = await ayarlar()
   return {
     title: { default: a.meta_baslik || a.site_adi || 'Nakliyat Rehberi', template: '%s' },
@@ -14,6 +19,16 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const eksik = eksikDegiskenler()
+  if (eksik.length) {
+    return (
+      <html lang="tr">
+        <head><meta name="robots" content="noindex" /></head>
+        <body><KurulumUyarisi eksik={eksik} /></body>
+      </html>
+    )
+  }
+
   const a = await ayarlar()
 
   return (
