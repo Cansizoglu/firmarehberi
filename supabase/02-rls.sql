@@ -44,3 +44,27 @@ create policy basvurular_okuma on basvurular
   for select to anon, authenticated using (yayinda = true);
 
 -- Yazma izni yok: service role RLS'i zaten atlar, admin panel onu kullanır.
+
+-- Tablo düzeyi izinler. Supabase yeni tablolara bunları normalde kendisi verir
+-- (public şemasındaki default privileges), ama dosya tek başına da doğru
+-- çalışsın diye açıkça yazıyoruz. RLS satır filtresi üstte duruyor: okuma izni
+-- olan rol yine sadece politikanın izin verdiği satırları görür.
+do $$
+declare r text;
+begin
+  foreach r in array array['anon','authenticated','service_role'] loop
+    if exists (select 1 from pg_roles where rolname = r) then
+      execute format('grant usage on schema public to %I', r);
+      execute format('grant select on all tables in schema public to %I', r);
+      execute format('alter default privileges in schema public grant select on tables to %I', r);
+    end if;
+  end loop;
+
+  -- service_role RLS'i atlar ve panel yazma işlerini onunla yapar
+  if exists (select 1 from pg_roles where rolname = 'service_role') then
+    grant all on all tables in schema public to service_role;
+    grant usage, select on all sequences in schema public to service_role;
+    alter default privileges in schema public grant all on tables to service_role;
+    alter default privileges in schema public grant usage, select on sequences to service_role;
+  end if;
+end $$;

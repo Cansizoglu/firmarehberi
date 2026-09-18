@@ -7,8 +7,11 @@ Adres yapısı, tasarım ve panel özellikleri korunmuştur.
 
 ## 1. Supabase kurulumu
 
-Supabase panelinde **SQL Editor**'ü aç ve `supabase/` klasöründeki dosyaları
-**sırayla** çalıştır:
+**En kolay yol:** Supabase panelinde **SQL Editor**'ü aç,
+`supabase/00-hepsi-tek-dosya.sql` dosyasının tamamını yapıştır ve **Run** de.
+Aşağıdaki dört adımın hepsi o dosyanın içinde, doğru sırayla.
+
+Tek tek çalıştırmak istersen `supabase/` klasöründeki dosyaları **sırayla** çalıştır:
 
 | Sıra | Dosya | Ne yapar |
 |---|---|---|
@@ -17,7 +20,21 @@ Supabase panelinde **SQL Editor**'ü aç ve `supabase/` klasöründeki dosyalar�
 | 3 | `supabase/03-veri.sql` | Mevcut verileri yükler: 51 firma, 7 ilçe, 11 kategori, 110 kategori bağı, 6 S.S.S. |
 | 4 | `supabase/04-ayarlar.sql` | Eksik ayar anahtarlarını ve sponsor banner'ını ekler |
 
-Dosyalar tekrar çalıştırılabilir; var olan kayıtları bozmaz.
+Dosyalar tekrar çalıştırılabilir; var olan kayıtları bozmaz — üç kez üst üste
+çalıştırılıp kayıt sayılarının sabit kaldığı doğrulandı.
+
+### İzinler
+
+`02-rls.sql` her tabloda Row Level Security'yi açar ve şunu kurar:
+
+| Rol | Ne yapabilir |
+|---|---|
+| `anon` (site ziyaretçisi) | Firmaları, ilçeleri, kategorileri, ayarları, sayfaları okur. Yorumlardan **sadece onaylı** olanları, başvurulardan **sadece yayına açılmış** olanları görür. Hiçbir tabloya yazamaz. |
+| `authenticated` | `anon` ile aynı. |
+| `service_role` | Her şeyi okur ve yazar. Admin paneli sunucu tarafında bunu kullanır. |
+
+Ziyaretçinin gönderdiği teklif ve yorumlar da sunucu tarafından `service_role`
+ile yazılır, yani tarayıcıdan veritabanına doğrudan yazma yolu yok.
 
 ### Storage
 
